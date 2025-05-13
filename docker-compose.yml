@@ -1,0 +1,130 @@
+version: '3.8' # Specifies the Docker Compose file format version
+
+services:
+  # Frontend Client (React served by Nginx)
+  client:
+    build:
+      context: ./client # Path to the client's Dockerfile directory
+      args:
+        # These URLs are for the React build process. They point to how
+        # services will be exposed ON THE HOST machine by Docker Compose,
+        # because the client runs in the user's browser.
+        REACT_APP_API_BASE_URL: http://localhost:5000/api
+        REACT_APP_RARITY_SERVICE_URL: http://localhost:8081/api
+        REACT_APP_AUTH_SERVICE_URL: http://localhost:5001/api # Python service on host port 5001
+    ports:
+      - "3000:80" # Map host port 3000 to container port 80 (Nginx)
+    depends_on:
+      - server # Optional: client depends on server being started
+      - java-rarity-service
+      - python-authenticity-service
+    networks:
+      - antiquitas_net
+    restart: unless-stopped
+
+  # Main Backend Server (Node.js)
+  server:
+    build: ./server # Path to the server's Dockerfile directory
+    ports:
+      - "5000:5000" # Map host port 5000 to container port 5000 (Node.js app)
+    environment:
+      # These are for server-to-service communication INSIDE the Docker network
+      # They use Docker service names and INTERNAL container ports.
+      PORT: 5000 # Port the Node.js app listens on INSIDE the container
+      MONGO_URI: mongodb://mongo:27017/antiquitasDB
+      JWT_SECRET: ${JWT_SECRET_MAIN_SERVER} # Will be picked from .env at project root
+      RARITY_SERVICE_URL: http://java-rarity-service:8080/api
+      AUTH_SERVICE_URL: http://python-authenticity-service:5001/api
+      PRIMARY_SERVICE_URL: http://primary-service:5003/api
+      SECONDARY_SERVICE_URL: http://secondary-service:5002/api
+    # env_file:
+    #   - ./server/.env # Alternative: load from service-specific .env, but ensure it's in .dockerignore
+    depends_on:
+      - mongo
+    networks:
+      - antiquitas_net
+    restart: unless-stopped
+    # volumes: # Uncomment for development to enable live-reloading for Node.js
+      # - ./server:/usr/src/app # Mount host 'server' dir to container's app dir
+      # - /usr/src/app/node_modules # Anonymous volume to prevent host node_modules from overwriting container's
+
+  # MongoDB Database
+  mongo:
+    image: mongo:latest # Use the official MongoDB image
+    ports:
+      - "27017:27017" # Map host port 27017 to container port 27017
+    volumes:
+      - mongo-data:/data/db # Persist MongoDB data in a named volume
+    networks:
+      - antiquitas_net
+    restart: unless-stopped
+
+  # Java Rarity Service (Spring Boot)
+  java-rarity-service:
+    build: ./java-rarity-service
+    ports:
+      - "8081:8080" # Map host port 8081 to container port 8080 (Spring Boot app)
+    environment:
+      SERVER_PORT: 8080 # Port Spring Boot listens on INSIDE the container
+      # Add any other environment variables needed by this service
+      # e.g., MONGO_URI_FOR_RARITY_SVC: mongodb://mongo:27017/antiquitasDB (if it uses Mongo)
+      #       MAIN_SERVER_API_URL_FOR_RARITY_SVC: http://server:5000/api (if it calls main server)
+    networks:
+      - antiquitas_net
+    restart: unless-stopped
+
+  # Python Authenticity Service (Flask)
+  python-authenticity-service:
+    build: ./python-authenticity-service
+    ports:
+      - "5001:5001" # Map host port 5001 to container port 5001 (Flask/Gunicorn app)
+    environment:
+      PORT: 5001 # Port Flask/Gunicorn listens on INSIDE the container
+      # Add any other environment variables needed by this service
+      # e.g., MAIN_SERVER_API_URL: http://server:5000/api (if it calls main server)
+    networks:
+      - antiquitas_net
+    restart: unless-stopped
+
+  # Primary Service (Node.js)
+  primary-service:
+    build: ./services/primary-service
+    ports:
+      - "5003:5003" # Map host port 5003 to container port 5003
+    environment:
+      PORT: 5003 # Port this Node.js app listens on INSIDE the container
+      # Add any other environment variables (e.g., MAIN_SERVER_API_URL, MONGO_URI)
+      # MAIN_SERVER_API_URL: http://server:5000/api
+      # MONGO_URI: mongodb://mongo:27017/antiquitasDB
+    depends_on:
+      - server # If it depends on the main server
+      - mongo  # If it depends on mongo
+    networks:
+      - antiquitas_net
+    restart: unless-stopped
+
+  # Secondary Service (Node.js)
+  secondary-service:
+    build: ./services/secondary-service
+    ports:
+      - "5002:5002" # Map host port 5002 to container port 5002
+    environment:
+      PORT: 5002 # Port this Node.js app listens on INSIDE the container
+      # Add any other environment variables
+      # MAIN_SERVER_API_URL: http://server:5000/api
+      # MONGO_URI: mongodb://mongo:27017/antiquitasDB
+    depends_on:
+      - server # If it depends on the main server
+      - mongo  # If it depends on mongo
+    networks:
+      - antiquitas_net
+    restart: unless-stopped
+
+# Define named volumes
+volumes:
+  mongo-data: # This volume will persist MongoDB data across container restarts
+
+# Define networks
+networks:
+  antiquitas_net: # Custom bridge network for inter-service communication
+    driver: bridge

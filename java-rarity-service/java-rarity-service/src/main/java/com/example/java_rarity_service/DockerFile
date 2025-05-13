@@ -1,0 +1,17 @@
+# java-rarity-service/Dockerfile
+# Use a base image with JRE
+FROM openjdk:17-jdk-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the packaged jar file into the container
+# Make sure to build the project first (e.g., ./mvnw package)
+# The JAR file will be in the 'target' directory
+COPY target/java-rarity-service-*.jar app.jar
+
+# Expose the port the application runs on
+EXPOSE 5002
+
+# Command to run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]

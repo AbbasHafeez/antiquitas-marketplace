@@ -1,0 +1,4 @@
+INDEX VERSION 1.134+D:\WEB Full\antiquitas-marketplace\java-rarity-service\java-rarity-service\.metadata\.plugins\org.eclipse.jdt.core
+1865797976.index
+1790445900.index
+4055639841.index

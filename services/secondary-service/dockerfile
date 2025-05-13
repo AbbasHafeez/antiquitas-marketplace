@@ -1,0 +1,22 @@
+# ANTIQUITAS-MAR.../services/secondary-service/Dockerfile
+
+# Use an official Node.js runtime as a parent image
+FROM node:18-alpine
+
+# Create app directory and set it as the working directory
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install app dependencies
+RUN npm install --only=production
+
+# Bundle app source
+COPY . .
+
+# This service binds to port 5002 (as per its .env file)
+EXPOSE 5002
+
+# Define the command to run your app (uses "start" script from its package.json)
+CMD [ "npm", "start" ]

@@ -1,0 +1,25 @@
+# Environment variables
+*.env
+.env
+client/.env
+server/.env
+java-rarity-service/.env
+python-authenticity-service/.env
+services/primary-service/.env
+services/secondary-service/.env
+
+# Node modules
+node_modules/
+client/node_modules/
+server/node_modules/
+# ... any other node_modules for other services
+
+# Build folders
+client/build/
+# ... any other build output folders
+
+# Other common ignores
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

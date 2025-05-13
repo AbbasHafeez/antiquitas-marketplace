@@ -1,0 +1,28 @@
+{
+  "name": "antiquitas-marketplace",
+  "version": "1.0.0",
+  "description": "An online marketplace for antiques",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run start",
+    "client": "cd client && npm run start",
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+    "build": "cd client && npm run build",
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run start\""
+  },
+  "keywords": [
+    "antiques",
+    "marketplace",
+    "ecommerce"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "dependencies": {
+    "antiquitas-marketplace": "file:",
+    "dotenv": "^16.5.0"
+  }
+}

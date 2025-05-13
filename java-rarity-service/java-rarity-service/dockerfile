@@ -1,0 +1,11 @@
+FROM openjdk:17-jdk-alpine
+
+WORKDIR /app
+
+COPY . .
+
+RUN ./mvnw package
+
+EXPOSE 8080
+
+CMD ["java", "-jar", "target/java-rarity-service.jar"]

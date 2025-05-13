@@ -1,0 +1,14 @@
+target
+.mvn/wrapper/maven-wrapper.jar
+*.log
+.idea
+*.iml
+.settings
+.classpath
+.project
+.DS_Store
+.git
+.gitignore
+README.md
+# Local env file if you created one for non-Docker local testing
+.env
