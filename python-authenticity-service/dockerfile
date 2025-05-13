@@ -3,15 +3,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# install your dependencies inline
-RUN pip install --no-cache-dir \
-      fastapi \
-      uvicorn \
-      requests \
-      sqlalchemy \
-      # …add any other libs you need
+# copy & install requirements
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-# copy your code
+# copy the rest of your code
 COPY . .
 
 EXPOSE 8000
