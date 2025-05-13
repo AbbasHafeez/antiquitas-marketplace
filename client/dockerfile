@@ -1,43 +1,15 @@
-# Stage 1: Build the React application
-FROM node:18-alpine AS build
+# client/Dockerfile
+FROM node:20-alpine as builder
 
 WORKDIR /app
-
-# Copy package.json and package-lock.json (or yarn.lock)
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
-
-# Copy the rest of the application code
 COPY . .
-
-# These ARGs will be passed from docker-compose.yml during the build
-ARG REACT_APP_API_BASE_URL
-ARG REACT_APP_RARITY_SERVICE_URL
-ARG REACT_APP_AUTH_SERVICE_URL
-
-# Set them as environment variables for the build process
-ENV REACT_APP_API_BASE_URL=${REACT_APP_API_BASE_URL}
-ENV REACT_APP_RARITY_SERVICE_URL=${REACT_APP_RARITY_SERVICE_URL}
-ENV REACT_APP_AUTH_SERVICE_URL=${REACT_APP_AUTH_SERVICE_URL}
-
-# Build the React app
 RUN npm run build
 
-# Stage 2: Serve the static files with Nginx
+# Serve with NGINX
 FROM nginx:stable-alpine
-
-# Copy the build output from the 'build' stage to Nginx's web server directory
-COPY --from=build /app/build /usr/share/nginx/html
-
-# (Optional but Recommended for React Router)
-# We will create an nginx.conf file next and copy it here.
-# If you are NOT using React Router or similar client-side routing, you can omit the next line.
+COPY --from=builder /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose port 80 (Nginx default port)
 EXPOSE 80
-
-# Command to start Nginx when the container launches
 CMD ["nginx", "-g", "daemon off;"]
