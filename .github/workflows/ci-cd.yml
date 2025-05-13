@@ -10,48 +10,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 👇 Check out your code
+      # 1️⃣ Check out your code
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 👇 Enable docker buildx
+      # 2️⃣ Enable Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 👇 Log in to Docker Hub
+      # 3️⃣ Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 👇 Build & Push Frontend
+      # 4️⃣ Build & Push React Frontend
       - name: Build and Push Frontend Image
         uses: docker/build-push-action@v5
         with:
           context: ./client
-          file: ./client/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/antiquitas-frontend:latest
+          file:    ./client/Dockerfile
+          push:    true
+          tags:    ${{ secrets.DOCKER_USERNAME }}/antiquitas-frontend:latest
 
-      # 👇 Build & Push Backend
+      # 5️⃣ Build & Push Node Backend
       - name: Build and Push Backend Image
         uses: docker/build-push-action@v5
         with:
           context: ./server
-          file: ./server/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/antiquitas-backend:latest
+          file:    ./server/Dockerfile
+          push:    true
+          tags:    ${{ secrets.DOCKER_USERNAME }}/antiquitas-backend:latest
 
-      # 👇 Build & Push Java Service
+      # 6️⃣ Build & Push Java Rarity Service
       - name: Build and Push Java Service Image
         uses: docker/build-push-action@v5
         with:
           context: ./java-rarity-service
-          file: ./java-rarity-service/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/antiquitas-java-service:latest
+          file:    ./java-rarity-service/Dockerfile
+          push:    true
+          tags:    ${{ secrets.DOCKER_USERNAME }}/antiquitas-java-service:latest
 
-# If /python-authenticity-service isn’t yet Docker-ready, we leave it out for now.
-# Once you have a working Dockerfile there (that doesn’t rely on a requirements.txt),
-# you can copy the above step and point `context:` & `file:` at that folder.
+      # 7️⃣ Build & Push Python Authenticity Service
+      - name: Build and Push Python Service Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./python-authenticity-service
+          file:    ./python-authenticity-service/dockerfile
+          push:    true
+          tags:    ${{ secrets.DOCKER_USERNAME }}/antiquitas-python-service:latest
