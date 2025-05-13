@@ -3,15 +3,16 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# 1️⃣ Copy only the requirements file (no leading slash!)
-COPY requirements.txt ./
+# install your dependencies inline
+RUN pip install --no-cache-dir \
+      fastapi \
+      uvicorn \
+      requests \
+      sqlalchemy \
+      # …add any other libs you need
 
-# 2️⃣ Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# 3️⃣ Copy the rest of the code
+# copy your code
 COPY . .
 
-# 4️⃣ Expose & run
 EXPOSE 8000
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
