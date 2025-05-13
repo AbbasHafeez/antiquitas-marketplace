@@ -49,6 +49,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./python-authenticity-service
-          file: ./python-authenticity-service/Dockerfile
+          # point at your existing lowercase 'dockerfile' here:
+          file: ./python-authenticity-service/dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/antiquitas-python-service:latest
